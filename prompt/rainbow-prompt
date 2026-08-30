@@ -1,0 +1,22 @@
+# Add this to the ~/.bashrc to get a full color gradient prompt with new randomized colors after each command.
+
+function color_gradient
+{
+  local prompt_raw="\D{%H:%M} \u@\h \w \$ "                      # change this at your own purpose
+  local prompt_string=$(printf "%b" "${prompt_raw@P}")
+  local entire_prompt=""
+  local frequency=0.2                                            # the lower the faster the change of the color gradient
+  local random_shift_number=$((RANDOM % 100))                    # play with this number for more or less 'color jumps' at new commands
+  for ((i=0; i<${#prompt_string}; i++))
+  do
+    local current_char="${prompt_string:$i:1}"
+    local color_shift_start=$((i + random_shift_number))
+    r=$(awk "BEGIN {print int(sin($frequency * $color_shift_start + 0) * 127 + 128)}")      # if you turn off the randomness
+    g=$(awk "BEGIN {print int(sin($frequency * $color_shift_start + 2) * 127 + 128)}")      # you can play with the 0 2 4 (0.x possible)
+    b=$(awk "BEGIN {print int(sin($frequency * $color_shift_start + 4) * 127 + 128)}")      # for changing the color gradient
+    entire_prompt+="\[\e[38;2;${r};${g};${b}m\]${current_char}"
+  done
+  PS1="${entire_prompt}"
+}
+
+PROMPT_COMMAND="color_gradient"
