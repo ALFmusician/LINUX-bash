@@ -5,7 +5,7 @@ function color_gradient
   local prompt_raw="\D{%H:%M} \u@\h \w \$ "                      # change this at your own purpose
   local prompt_string=$(printf "%b" "${prompt_raw@P}")
   local entire_prompt=""
-  local frequency=0.2                                            # the lower the faster the change of the color gradient
+  local frequency=0.2                                            # the lower the narrower the colors
   local random_shift_number=$((RANDOM % 100))                    # play with this number for more or less 'color jumps' at new commands
   for ((i=0; i<${#prompt_string}; i++))
   do
