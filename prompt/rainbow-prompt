@@ -1,22 +1,27 @@
-# Add this to the ~/.bashrc to get a full color gradient prompt with new randomized colors after each command.
+# Add this to the ~/.bashrc to get a full color gradient prompt with new randomized colors after each command.  
 
-function color_gradient
+COLOR_GRADIENT_TABLE=()                                            # builds once a tuple/table after start of shell
+for ((i=0; i<200; i++))
+do                                                                 # f = frequency -> density of the color gradient
+  read -r r g b < <(awk -v i="$i" -v f="0.2" 'BEGIN {
+  print int(sin(f*i+0)*127+128), int(sin(f*i+2)*127+128), int(sin(f*i+4)*127+128)}')
+  COLOR_GRADIENT_TABLE+=("$r;$g;$b")
+done
+
+color_gradient()
 {
-  local prompt_raw="\D{%H:%M} \u@\h \w \$ "                      # change this at your own purpose
-  local prompt_string=$(printf "%b" "${prompt_raw@P}")
+  local prompt_raw="\D{%H:%M} \u@\h \w \$ "                        # change this at your own purpose
+  local prompt_string="${prompt_raw@P}"
   local entire_prompt=""
-  local frequency=0.2                                            # the lower the narrower the colors
-  local random_shift_number=$((RANDOM % 100))                    # play with this number for more or less 'color jumps' at new commands
+  local color_table_start=$((RANDOM % 100))                        # play with this number for more or less 'color jumps' at new commands
   for ((i=0; i<${#prompt_string}; i++))
   do
-    local current_char="${prompt_string:$i:1}"
-    local color_shift_start=$((i + random_shift_number))
-    r=$(awk "BEGIN {print int(sin($frequency * $color_shift_start + 0) * 127 + 128)}")      # if you turn off the randomness
-    g=$(awk "BEGIN {print int(sin($frequency * $color_shift_start + 2) * 127 + 128)}")      # you can play with the 0 2 4 (0.x possible)
-    b=$(awk "BEGIN {print int(sin($frequency * $color_shift_start + 4) * 127 + 128)}")      # for changing the color gradient
-    entire_prompt+="\[\e[38;2;${r};${g};${b}m\]${current_char}"
+    local current_char="${prompt_string:i:1}"
+    local color_table_index=$(((color_table_start + i) % 200))
+    local rgb="${COLOR_GRADIENT_TABLE[color_table_index]}"
+    entire_prompt+="\[\e[38;2;${rgb}m\]${current_char}"
   done
-  PS1="${entire_prompt}"
+  PS1="${entire_prompt}"                                           # for only getting the prompt colorized add \e[0m before last/second "
 }
 
 PROMPT_COMMAND="color_gradient"
